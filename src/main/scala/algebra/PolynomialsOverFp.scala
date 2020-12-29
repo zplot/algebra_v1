@@ -160,7 +160,7 @@ case class PolynomialsOverFp(field: Fp ) {
         case x :: xs => x._2 + "x" + x._1 + " + " + printPol(xs)
       }
       def replacePlusMinus(s: String): String = s.replace("+ -", "- ")
-      if (this == zeroPolynomial) "0" else replacePlusMinus(printPol(this.map.toList.sortWith(Polynomial.comp)).dropRight(2))
+      if (this == zeroPolynomial) "0" else replacePlusMinus(printPol(this.map.toList.sortWith(Polynomial.comp)).dropRight(3))
       //map.toString()
     }
 

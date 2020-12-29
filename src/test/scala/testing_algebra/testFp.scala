@@ -8,9 +8,9 @@ object testFp extends App {
 
   val cuerpo = Fp(13)
   println(cuerpo)
-  val cuatro = cuerpo.FpElement(4)
-  val nueve = cuerpo.FpElement(9)
-  val c14 = cuerpo.FpElement(14)
+  val cuatro = new cuerpo.FpElement(4)
+  val nueve = new cuerpo.FpElement(9)
+  val c14 = new cuerpo.FpElement(14)
 
   println(cuerpo.one)
   println(c14)

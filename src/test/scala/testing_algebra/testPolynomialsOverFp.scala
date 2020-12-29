@@ -39,6 +39,9 @@ object testPolynomialsOverFp extends  App {
   println(poly1 - poly2)
   println(poly1 * poly3)
   println(poly1 / poly4)
+  val a = 5.toString
+  val b = 4.toString
+  println(a+b)
 
 }
 

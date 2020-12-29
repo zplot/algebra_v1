@@ -16,7 +16,20 @@ case class Fp(p: Int) extends Field {
   val zero: T = FpElement(0)
   val one: T = FpElement(1)
 
-  case class FpElement(n: Int) extends FieldElement {
+  def module(x: Int): Int = if (x < 0) -x else x
+
+  private object FpElement {
+    def apply(k: S): FpElement = {
+      val v: Int = if (k < 0) {
+        (module(k) / p + 1) * p + k
+      } else {
+        k
+      }
+      new FpElement(v % p)
+    }
+  }
+
+  class FpElement(n: Int) extends FieldElement {
 
     val value: Int = n % p
     def add(other: T): T = FpElement(this.value + other.value)
