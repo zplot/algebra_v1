@@ -1,5 +1,7 @@
 package algebra
 
+import algebra.Utils._
+
 import scala.annotation.tailrec
 
 case class PolynomialsOverFp(field: Fp ) {
@@ -33,9 +35,48 @@ case class PolynomialsOverFp(field: Fp ) {
 
 
 
-  val zeroPolynomial: Polynomial = Polynomial(Map(0 -> field.zero))
+  val zeroPolynomial: T = Polynomial(Map(0 -> field.zero))
 
   val x: T = Polynomial(Map(1 -> field.one))
+
+  def gcdExtended(g: T, h: T): (T, T, T) = {
+
+    val r: T = g
+    val rPrime: T = h
+    val s: T = Polynomial(Map(0 -> field.one))
+    val sPrime: T = zeroPolynomial
+    val t: T = zeroPolynomial
+    val tPrime: T = Polynomial(Map(0 -> field.one))
+
+    @tailrec
+    def loop(r: T, s: T, t: T, rPrime: T, sPrime: T, tPrime: T): (T, T, T, T, T, T) = {
+
+      if (rPrime != zeroPolynomial) {
+        val (q, rPrimePrime) = r / rPrime
+        loop(rPrime, sPrime, tPrime, rPrimePrime, s - sPrime * q, t - tPrime * q)
+      } else {
+        val c = r.lc
+        val (d, tmp2) = r / c
+        val sNew = s / c
+        val tNew = t / c
+        (d, sNew._1, tNew._1, zeroPolynomial, zeroPolynomial, zeroPolynomial)
+      }
+    }
+    val (gcdFinal,sFinal,tFinal, dummy1, dummy2, dummy3) = loop(r, s, t, rPrime, sPrime, tPrime)
+    (gcdFinal, sFinal, tFinal)
+  }
+
+  def gcd(g: T, h: T): T = {
+    val tmp = gcdExtended(g,h)
+    tmp._1
+  }
+
+  def exp(h: T, exponent: Int): T = {
+    @tailrec
+    def loop(h: Polynomial, exp: Int, acc: Polynomial): Polynomial =
+      if (exp <= 1) acc else loop(h, exp - 1, acc * h)
+    loop (h, exponent, h)
+  }
 
 
 
@@ -148,7 +189,35 @@ case class PolynomialsOverFp(field: Fp ) {
 
     def mod(h: T): T = this.divide(h)._2
 
-    def isIrreducible: Boolean = ???
+    // We will use Rabin's test
+    // https://en.wikipedia.org/wiki/Factorization_of_polynomials_over_finite_fields
+    def isIrreducible: Boolean = {
+      val monic = this.toMonic
+      val n = this.degree
+      val degreePrimeFactors: List[(Int, Int)] = primeFactors(n)
+      val primefactors: List[Int] = degreePrimeFactors.map(x => x._1)
+      val k: Int = primefactors.length // Number of prime factors od degree
+      val nj: List[Int] = primefactors.map(x => n / x)
+      val h1: List[Int] = (0 until k).toList
+      def hFunction1(ni: Int) : T = {
+        val tmp1: Int = scala.math.pow(field.p, ni).toInt
+        val tmp2: T = Polynomial(Map(tmp1 -> field.one))
+        val tmp3 = (x / monic)._2
+        val h = tmp2 - tmp3
+        h
+      }
+      def xPowerqPowern(n: Int) : T = {
+        val tmp1: Int = scala.math.pow(field.p, n).toInt
+        val tmp2: T = Polynomial(Map(tmp1 -> field.one))
+        tmp2
+      }
+      val h2 = h1.map(i => gcd(monic, hFunction1(nj(i))))
+      val AreallOnes = h2.forall(_ == Polynomial(Map(0 -> field.one)))
+      val division = (xPowerqPowern(n) - x) / this
+      val g = division._2 // rest
+      val is_g_0 = g == zeroPolynomial
+      if (!AreallOnes || g != zeroPolynomial) false else true
+    }
 
     override def toString: String = {
       def printPol(a: List[(Int, R)]): String = a match {
