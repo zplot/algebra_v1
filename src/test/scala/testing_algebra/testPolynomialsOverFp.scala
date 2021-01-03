@@ -31,9 +31,16 @@ object testPolynomialsOverFp extends  App {
     anillo.Polynomial(b)
   }
 
+  def convert3(p: Int, a: Map[Int, Int]) = {
+    val cuerpo = Fp(p)
+    val anillo = PolynomialsOverFp(cuerpo)
+    val b = a.map(x => (x._1, anillo.field.build(x._2)))
+    anillo.Polynomial(b)
+  }
 
 
-  val p = convert2(Fp(5), Map(1 -> 2, 2 -> 3))
+
+  val p = convert3(5, Map(1 -> 2, 2 -> 3))
   println(p)
 
 
