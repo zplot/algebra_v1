@@ -6,10 +6,12 @@ import scala.annotation.tailrec
 
 case class PolynomialsOverFp(field: Fp ) {
 
+  type Q = Map[Int, Int]
   type R = field.FpElement  // Field elements
   type S = Map[Int, R]      // Maps
   type T = Polynomial       // Polynomials
   val zeroPolynomial: T = Polynomial(Map(0 -> field.zero))
+  val onePolynomial: T = Polynomial(Map(0 -> field.one))
   val x: T = Polynomial(Map(1 -> field.one))
   def gcd(g: T, h: T): T = {
     val tmp = gcdExtended(g,h)
@@ -49,7 +51,6 @@ case class PolynomialsOverFp(field: Fp ) {
   }
 
   class Polynomial private(val map: S)  {
-
 
     val degree: Int = {
       //val step1 =  map.keySet
@@ -173,6 +174,37 @@ case class PolynomialsOverFp(field: Fp ) {
       if (!AreallOnes || g != zeroPolynomial) false else true
     }
 
+    def isIrreducible2: Boolean = {
+
+      val n = degree
+      val cond1: Boolean = {
+
+        val exponent = math.pow(field.p, degree).toInt
+        val xToPn = exp(x, exponent)
+        //xToPn.mod(this) == x.mod(this)
+        val xToPnMinusX = xToPn - x
+        xToPnMinusX.mod(this) == zeroPolynomial
+      }
+
+      val cond2: Boolean = {
+        val factores = factors(n)
+        val factors2 = factores.slice(1, factores.length - 1)
+        val tmp1 = for(q <- factors2) yield {
+          val exp1 = n/q
+          val tmp2 = exp(x, exp1)
+          val tmp2MinusX = tmp2 - x
+          val tmp4 = gcd(tmp2MinusX, this)
+          val tmp5 = tmp4 == onePolynomial
+          tmp5
+        }
+        tmp1.forall(x => x)
+      }
+
+      cond1 && cond2
+    }
+
+
+
     override def toString: String = {
       def printPol(a: List[(Int, R)]): String = a match {
         case Nil => ""
@@ -217,6 +249,18 @@ case class PolynomialsOverFp(field: Fp ) {
       }
       new Polynomial(normalMap)
     }
+
+    def mapToPolynomial(intMap: Map[Int, Int]): T = {
+      val map1: S = intMap.map(x => (x._1, field.build(x._2)))
+      new Polynomial(map1)
+    }
+
+
+
+
+
+
+
 
     // Creo que esto es para comparar monomios de acuerdo con el grado
     def comp(monomial1: (Int, R), monomial2: (Int, R)): Boolean = monomial1._1 > monomial2._1
