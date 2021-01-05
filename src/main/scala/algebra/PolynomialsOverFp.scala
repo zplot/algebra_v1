@@ -174,6 +174,7 @@ case class PolynomialsOverFp(field: Fp ) {
       if (!AreallOnes || g != zeroPolynomial) false else true
     }
 
+    // No funciona. Se puede probar con 3x2 + 2x sobre Fp(5)
     def isIrreducible2: Boolean = {
 
       val n = degree
@@ -181,7 +182,6 @@ case class PolynomialsOverFp(field: Fp ) {
 
         val exponent = math.pow(field.p, degree).toInt
         val xToPn = exp(x, exponent)
-        //xToPn.mod(this) == x.mod(this)
         val xToPnMinusX = xToPn - x
         xToPnMinusX.mod(this) == zeroPolynomial
       }
@@ -200,7 +200,7 @@ case class PolynomialsOverFp(field: Fp ) {
         tmp1.forall(x => x)
       }
 
-      cond1 && cond2
+      cond1 || cond2
     }
 
 
