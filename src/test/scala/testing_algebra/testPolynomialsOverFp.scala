@@ -49,10 +49,9 @@ object testPolynomialsOverFp extends  App {
 
   def convert5( p: Int, a: Map[Int, Int]) = {
     val cuerpo = Fp(p)
-    val anilloDePolis = PolynomialsOverFp(cuerpo)
-    val anillo = anilloDePolis
-    val b = a.map(x => (x._1, anilloDePolis.field.build(x._2)))
-    val c = anilloDePolis.Polynomial(b)
+    val anillo = PolynomialsOverFp(cuerpo)
+    val b = a.map(x => (x._1, anillo.field.build(x._2)))
+    val c = anillo.Polynomial(b)
     c
   }
 
