@@ -188,7 +188,7 @@ case class PolynomialsOverFp(field: Fp) {
       val h1: List[Int] = (0 until k).toList
 
       def hFunction1(ni: Int): T = {
-        val tmp1: Int = scala.math.pow(field.p, ni).toInt
+        val tmp1: Int = powerInt(field.p, ni)
         val tmp2: T = Polynomial(Map(tmp1 -> field.one))
         val tmp3 = (x / monic)._2
         val h = tmp2 - tmp3
@@ -196,7 +196,7 @@ case class PolynomialsOverFp(field: Fp) {
       }
 
       def xPowerqPowern(n: Int): T = {
-        val tmp1: Int = scala.math.pow(field.p, n).toInt
+        val tmp1: Int = powerInt(field.p, n)
         val tmp2: T = Polynomial(Map(tmp1 -> field.one))
         tmp2
       }
@@ -205,14 +205,14 @@ case class PolynomialsOverFp(field: Fp) {
       val AreallOnes = h2.forall(_ == Polynomial(Map(0 -> field.one)))
       val division = (xPowerqPowern(n) - x) / this
       val g = division._2 // rest
-      val is_g_0 = g == zeroPolynomial
+
       if (!AreallOnes || g != zeroPolynomial) false else true
     }
     // No funciona. Se puede probar con 3x2 + 2x sobre Fp(5)
     def isIrreducible2: Boolean = {
       val n = degree
       val cond1: Boolean = {
-        val exponent = math.pow(field.p, degree).toInt
+        val exponent = powerInt(field.p, degree)
         val xToPn = exp(x, exponent)
         val xToPnMinusX = xToPn - x
         xToPnMinusX.mod(this) == zeroPolynomial

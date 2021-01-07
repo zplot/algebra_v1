@@ -131,6 +131,11 @@ object Utils {
     implicit val dummyImplicit: DummyImplicit = new DummyImplicit
   }
 
+  def powerInt(base:Int, exp: Int): Int = scala.math.pow(base, exp).toInt
+
+
+
+
 }
 
 
