@@ -123,6 +123,14 @@ object Utils {
     }
   }
 
+
+  /** A type for which there is always an implicit value. */
+  final class DummyImplicit private ()
+  object DummyImplicit {
+    /** An implicit value yielding a `DummyImplicit`. */
+    implicit val dummyImplicit: DummyImplicit = new DummyImplicit
+  }
+
 }
 
 

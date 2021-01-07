@@ -4,12 +4,24 @@ import algebra.Utils._
 
 import scala.annotation.tailrec
 
+
+
 case class PolynomialsOverFp(field: Fp ) {
 
   type Q = Map[Int, Int]
   type R = field.FpElement  // Field elements
   type S = Map[Int, R]      // Maps
   type T = Polynomial       // Polynomials
+
+  final class DummyImplicit private ()
+  object DummyImplicit {
+    /** An implicit value yielding a `DummyImplicit`. */
+    implicit val dummyImplicit: DummyImplicit = new DummyImplicit
+  }
+
+
+
+
   val zeroPolynomial: T = Polynomial(Map(0 -> field.zero))
   val onePolynomial: T = Polynomial(Map(0 -> field.one))
   val x: T = Polynomial(Map(1 -> field.one))
@@ -48,6 +60,49 @@ case class PolynomialsOverFp(field: Fp ) {
     def loop(h: Polynomial, exp: Int, acc: Polynomial): Polynomial =
       if (exp <= 1) acc else loop(h, exp - 1, acc * h)
     loop (h, exponent, h)
+  }
+
+  object Polynomial {
+
+    def apply(map: S): T = {
+
+      val normalMap: S = {
+        val theMapList = map.toList
+        def newMapList(oldMapList: List[(Int, R)]): List[(Int, R)] = oldMapList match {
+          case Nil => Nil
+          case (_, field.zero) :: xs => newMapList(xs)
+          case (x1, x2) :: xs  => (x1, x2) :: newMapList(xs)
+        }
+        val theNewMapList = newMapList(theMapList)
+        val theNewMap = theNewMapList.toMap
+        theNewMap
+      }
+      new Polynomial(normalMap)
+    }
+
+    def apply(s: Q) (implicit d: DummyImplicit): T = {
+
+      val b = s.map(x => (x._1, field.build(x._2)))
+      new Polynomial(b)
+    }
+
+
+
+    def mapToPolynomial(intMap: Map[Int, Int]): T = {
+      val map1: S = intMap.map(x => (x._1, field.build(x._2)))
+      new Polynomial(map1)
+    }
+
+
+
+
+
+
+
+
+    // Creo que esto es para comparar monomios de acuerdo con el grado
+    def comp(monomial1: (Int, R), monomial2: (Int, R)): Boolean = monomial1._1 > monomial2._1
+
   }
 
   class Polynomial private(val map: S)  {
@@ -232,48 +287,8 @@ case class PolynomialsOverFp(field: Fp ) {
 
   }
 
-  object Polynomial {
-
-    def apply(map: S): T = {
-
-      val normalMap: S = {
-        val theMapList = map.toList
-        def newMapList(oldMapList: List[(Int, R)]): List[(Int, R)] = oldMapList match {
-          case Nil => Nil
-          case (_, field.zero) :: xs => newMapList(xs)
-          case (x1, x2) :: xs  => (x1, x2) :: newMapList(xs)
-        }
-        val theNewMapList = newMapList(theMapList)
-        val theNewMap = theNewMapList.toMap
-        theNewMap
-      }
-      new Polynomial(normalMap)
-    }
-
-    def mapToPolynomial(intMap: Map[Int, Int]): T = {
-      val map1: S = intMap.map(x => (x._1, field.build(x._2)))
-      new Polynomial(map1)
-    }
-
-
-
-
-
-
-
-
-    // Creo que esto es para comparar monomios de acuerdo con el grado
-    def comp(monomial1: (Int, R), monomial2: (Int, R)): Boolean = monomial1._1 > monomial2._1
-
-  }
-
-
-
-
-
-
-
-
 
 }
+
+
 

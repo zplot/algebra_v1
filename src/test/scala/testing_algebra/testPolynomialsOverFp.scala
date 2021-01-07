@@ -1,5 +1,6 @@
 package testing_algebra
 import algebra._
+import algebra.Utils._
 
 
 
@@ -58,7 +59,7 @@ object testPolynomialsOverFp extends  App {
 
 
 
-  println("Voy por aquí")
+
 
 
 
@@ -73,10 +74,15 @@ object testPolynomialsOverFp extends  App {
   val c = a + b
   println("a + b = " + (a+b))
 
-  val q = convert5(2, Map(6 -> 1, 2 -> 4))
-  println(q, q.isIrreducible)
+  val q4 = convert4(Map(1 -> 1, 2 -> 2))
+//  val q5 = convert5(2, Map(6 -> 1, 2 -> 4))
 
-  val aa = convert4(Map(5 -> 1))
+  println("Voy por aquí")
+
+  println(q4, q4.isIrreducible)
+//  println(q5, q5.isIrreducible)
+
+  val aa = convert4(Map(23 -> 1, 98 -> 5, 8 -> 2))
   val bb = convert4(Map(1 -> 4))
 
   println(aa)
@@ -105,8 +111,8 @@ object testPolynomialsOverFp extends  App {
 
 
 
-
-
+  val anillo5 = PolynomialsOverFp(Fp(5))
+  val poly5 = anillo5.Polynomial(Map(2 -> 3))
 
 
 
