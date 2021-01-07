@@ -41,7 +41,6 @@ object testPolynomialsOverFp extends  App {
   }
 
   def convert4(a: Map[Int, Int]) = {
-    val anillo = anilloDePolis
     val b = a.map(x => (x._1, anilloDePolis.field.build(x._2)))
     val c = anilloDePolis.Polynomial(b)
     c
@@ -74,7 +73,7 @@ object testPolynomialsOverFp extends  App {
   val c = a + b
   println("a + b = " + (a+b))
 
-  val q = convert5(5, Map(3 -> 1, 2 -> 4))
+  val q = convert5(2, Map(6 -> 1, 2 -> 4))
   println(q, q.isIrreducible)
 
   val aa = convert4(Map(5 -> 1))
