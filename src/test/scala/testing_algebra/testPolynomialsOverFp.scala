@@ -87,8 +87,8 @@ object testPolynomialsOverFp extends  App {
 
   println(aa)
   println(bb)
-  val cc = aa + bb
-  println("aa + bb = " + (aa+bb))
+  val cc = aa*bb
+  println("aa*bb = " + (aa*bb))
 
 
 
@@ -112,7 +112,7 @@ object testPolynomialsOverFp extends  App {
 
 
   val anillo5 = PolynomialsOverFp(Fp(5))
-  val poly5 = anillo5.Polynomial(Map(2 -> 3))
+  val poly5 = anillo5.Polynomial(Map(25 -> 3))
 
 
 

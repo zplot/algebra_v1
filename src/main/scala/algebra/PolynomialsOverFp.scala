@@ -1,36 +1,28 @@
 package algebra
 
 import algebra.Utils._
-
 import scala.annotation.tailrec
 
-
-
-case class PolynomialsOverFp(field: Fp ) {
-
+case class PolynomialsOverFp(field: Fp) {
   type Q = Map[Int, Int]
-  type R = field.FpElement  // Field elements
-  type S = Map[Int, R]      // Maps
-  type T = Polynomial       // Polynomials
+  type R = field.FpElement // Field elements
+  type S = Map[Int, R] // Maps
+  type T = Polynomial // Polynomials
+  final class DummyImplicit private()
 
-  final class DummyImplicit private ()
   object DummyImplicit {
     /** An implicit value yielding a `DummyImplicit`. */
     implicit val dummyImplicit: DummyImplicit = new DummyImplicit
   }
 
-
-
-
   val zeroPolynomial: T = Polynomial(Map(0 -> field.zero))
   val onePolynomial: T = Polynomial(Map(0 -> field.one))
   val x: T = Polynomial(Map(1 -> field.one))
   def gcd(g: T, h: T): T = {
-    val tmp = gcdExtended(g,h)
+    val tmp = gcdExtended(g, h)
     tmp._1
   }
   def gcdExtended(g: T, h: T): (T, T, T) = {
-
     val r: T = g
     val rPrime: T = h
     val s: T = Polynomial(Map(0 -> field.one))
@@ -40,7 +32,6 @@ case class PolynomialsOverFp(field: Fp ) {
 
     @tailrec
     def loop(r: T, s: T, t: T, rPrime: T, sPrime: T, tPrime: T): (T, T, T, T, T, T) = {
-
       if (rPrime != zeroPolynomial) {
         val (q, rPrimePrime) = r / rPrime
         loop(rPrime, sPrime, tPrime, rPrimePrime, s - sPrime * q, t - tPrime * q)
@@ -52,61 +43,48 @@ case class PolynomialsOverFp(field: Fp ) {
         (d, sNew._1, tNew._1, zeroPolynomial, zeroPolynomial, zeroPolynomial)
       }
     }
-    val (gcdFinal,sFinal,tFinal, _, dummy2, dummy3) = loop(r, s, t, rPrime, sPrime, tPrime)
+
+    val (gcdFinal, sFinal, tFinal, _, dummy2, dummy3) = loop(r, s, t, rPrime, sPrime, tPrime)
     (gcdFinal, sFinal, tFinal)
   }
   def exp(h: T, exponent: Int): T = {
     @tailrec
     def loop(h: Polynomial, exp: Int, acc: Polynomial): Polynomial =
       if (exp <= 1) acc else loop(h, exp - 1, acc * h)
-    loop (h, exponent, h)
+
+    loop(h, exponent, h)
   }
 
   object Polynomial {
-
     def apply(map: S): T = {
-
       val normalMap: S = {
         val theMapList = map.toList
+
         def newMapList(oldMapList: List[(Int, R)]): List[(Int, R)] = oldMapList match {
           case Nil => Nil
           case (_, field.zero) :: xs => newMapList(xs)
-          case (x1, x2) :: xs  => (x1, x2) :: newMapList(xs)
+          case (x1, x2) :: xs => (x1, x2) :: newMapList(xs)
         }
+
         val theNewMapList = newMapList(theMapList)
         val theNewMap = theNewMapList.toMap
         theNewMap
       }
       new Polynomial(normalMap)
     }
-
-    def apply(s: Q) (implicit d: DummyImplicit): T = {
-
+    def apply(s: Q)(implicit d: DummyImplicit): T = {
       val b = s.map(x => (x._1, field.build(x._2)))
       new Polynomial(b)
     }
-
-
-
     def mapToPolynomial(intMap: Map[Int, Int]): T = {
       val map1: S = intMap.map(x => (x._1, field.build(x._2)))
       new Polynomial(map1)
     }
-
-
-
-
-
-
-
-
     // Creo que esto es para comparar monomios de acuerdo con el grado
     def comp(monomial1: (Int, R), monomial2: (Int, R)): Boolean = monomial1._1 > monomial2._1
-
   }
 
-  class Polynomial private(val map: S)  {
-
+  class Polynomial private(val map: S) {
     val degree: Int = {
       //val step1 =  map.keySet
       val step1 = map.keySet
@@ -118,20 +96,17 @@ case class PolynomialsOverFp(field: Fp ) {
     def /(other: T): (T, T) = this.divide(other)
     def /(other: R): (T, T) = this.divide(other)
     def divide(other: R): (T, T) = {
-
       val a: T = this
       val b: T = Polynomial(Map(0 -> other))
       a.divide(b)
-
     }
     // Ver https://en.wikipedia.org/wiki/Polynomial_greatest_common_divisor#Euclid.27s_algorithm
     def divide(other: T): (T, T) = {
-
       val a: T = this
       val b: T = other
       val d: Int = b.degree
 
-      def s(r: T): T = Polynomial(Map( r.degree - d -> r.lc.divide(b.lc)))
+      def s(r: T): T = Polynomial(Map(r.degree - d -> r.lc.divide(b.lc)))
 
       @tailrec
       def loop(q: T, r: T): (T, T) = {
@@ -139,6 +114,7 @@ case class PolynomialsOverFp(field: Fp ) {
           loop(q + s(r), r - (s(r) * b))
         }
       }
+
       loop(zeroPolynomial, a)
     }
     def *(other: T): T = this.multiply(other)
@@ -159,17 +135,17 @@ case class PolynomialsOverFp(field: Fp ) {
       val step3 = step2.map(sumCoef)
       val step4 = step3.toMap
       Polynomial(step4)
-
     }
     def +(other: T): T = this.add(other)
     def add(other: T): T = {
-
       val tmp3 = field.zero
       val exponents = (map.keySet ++ other.map.keySet).toList
+
       def recursion(exp: List[Int]): S = exp match {
         case Nil => Map[Int, R]()
         case x :: xs => recursion(xs) + (x -> (map.getOrElse(x, tmp3) + other.map.getOrElse(x, tmp3)))
       }
+
       val temporalMap = recursion(exponents)
       val temporalPoly = Polynomial(temporalMap)
       val result = temporalPoly
@@ -188,17 +164,18 @@ case class PolynomialsOverFp(field: Fp ) {
     def isMonic: Boolean = this == this.toMonic
     def toMonic: T = {
       val oldMapList = map.toList
+
       def newMapList(oldMapList: List[(Int, R)]): List[(Int, R)] = oldMapList match {
         case Nil => Nil
-        case (x1, x2) :: xs  => (x1, x2.divide(lc)) :: newMapList(xs)
+        case (x1, x2) :: xs => (x1, x2.divide(lc)) :: newMapList(xs)
       }
+
       if (lc == field.one) this else {
         val finalMap = newMapList(oldMapList).toMap
         new Polynomial(finalMap)
       }
     }
     def mod(h: T): T = this.divide(h)._2
-
     // We will use Rabin's test
     // https://en.wikipedia.org/wiki/Factorization_of_polynomials_over_finite_fields
     def isIrreducible: Boolean = {
@@ -209,18 +186,21 @@ case class PolynomialsOverFp(field: Fp ) {
       val k: Int = primefactors.length // Number of prime factors od degree
       val nj: List[Int] = primefactors.map(x => n / x)
       val h1: List[Int] = (0 until k).toList
-      def hFunction1(ni: Int) : T = {
+
+      def hFunction1(ni: Int): T = {
         val tmp1: Int = scala.math.pow(field.p, ni).toInt
         val tmp2: T = Polynomial(Map(tmp1 -> field.one))
         val tmp3 = (x / monic)._2
         val h = tmp2 - tmp3
         h
       }
-      def xPowerqPowern(n: Int) : T = {
+
+      def xPowerqPowern(n: Int): T = {
         val tmp1: Int = scala.math.pow(field.p, n).toInt
         val tmp2: T = Polynomial(Map(tmp1 -> field.one))
         tmp2
       }
+
       val h2 = h1.map(i => gcd(monic, hFunction1(nj(i))))
       val AreallOnes = h2.forall(_ == Polynomial(Map(0 -> field.one)))
       val division = (xPowerqPowern(n) - x) / this
@@ -228,24 +208,20 @@ case class PolynomialsOverFp(field: Fp ) {
       val is_g_0 = g == zeroPolynomial
       if (!AreallOnes || g != zeroPolynomial) false else true
     }
-
     // No funciona. Se puede probar con 3x2 + 2x sobre Fp(5)
     def isIrreducible2: Boolean = {
-
       val n = degree
       val cond1: Boolean = {
-
         val exponent = math.pow(field.p, degree).toInt
         val xToPn = exp(x, exponent)
         val xToPnMinusX = xToPn - x
         xToPnMinusX.mod(this) == zeroPolynomial
       }
-
       val cond2: Boolean = {
         val factores = factors(n)
         val factors2 = factores.slice(1, factores.length - 1)
-        val tmp1 = for(q <- factors2) yield {
-          val exp1 = n/q
+        val tmp1 = for (q <- factors2) yield {
+          val exp1 = n / q
           val tmp2 = exp(x, exp1)
           val tmp2MinusX = tmp2 - x
           val tmp4 = gcd(tmp2MinusX, this)
@@ -254,12 +230,8 @@ case class PolynomialsOverFp(field: Fp ) {
         }
         tmp1.forall(x => x)
       }
-
       cond1 || cond2
     }
-
-
-
     override def toString: String = {
       def printPol(a: List[(Int, R)]): String = a match {
         case Nil => ""
@@ -269,11 +241,12 @@ case class PolynomialsOverFp(field: Fp ) {
         case x :: xs if x._2 == field.one => "x" + x._1 + " + " + printPol(xs)
         case x :: xs => x._2 + "x" + x._1 + " + " + printPol(xs)
       }
+
       def replacePlusMinus(s: String): String = s.replace("+ -", "- ")
+
       if (this == zeroPolynomial) "0" else replacePlusMinus(printPol(this.map.toList.sortWith(Polynomial.comp)).dropRight(3))
       //map.toString()
     }
-
     override def equals(other: Any): Boolean = {
       val that = other.asInstanceOf[T]
       if (that == null) false
@@ -284,9 +257,7 @@ case class PolynomialsOverFp(field: Fp ) {
         a1 || a2 || a3
       }
     }
-
   }
-
 
 }
 
